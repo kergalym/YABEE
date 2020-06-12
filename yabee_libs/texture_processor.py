@@ -74,6 +74,13 @@ class PbrTextures:
 
                                         if (link.to_socket.name == 'Base Color'
                                                 and link.to_node.inputs[0].is_linked):
+                                            if textureNode.image.colorspace_settings.name == 'sRGB':
+
+                                                if textureNode.image.channels == 3:
+                                                    scalars.append(('format', 'rgb'))
+                                                elif textureNode.image.channels == 4:
+                                                    scalars.append(('format', 'rgba'))
+
                                             scalars.append(('envtype', 'modulate'))
 
                                         elif (link.to_socket.name == 'Normal'

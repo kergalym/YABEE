@@ -1197,7 +1197,7 @@ def get_egg_materials_str(object_names=None):
                         if not principled_bsdf.inputs["IOR"].is_linked:
                             ior = principled_bsdf.inputs["IOR"].default_value
                         else:
-                            ior = 1.5
+                            ior = 0
 
                         base_r = basecol[0]
                         base_g = basecol[1]
@@ -1447,8 +1447,6 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
 
     if AUTOSELECT:
         bpy.ops.object.select_all(action='SELECT')
-    else:
-        bpy.ops.object.select_all(action='DESELECT')
 
     STRF = str_f
     # Prepare copy of the scene.
