@@ -25,8 +25,6 @@ New minor features
 **Automatic selection** automatically selects all objects in the scene. 
 **Apply object transform** will change **only copy** of the scene prepared for an export.
 
-<img src="https://i.imgur.com/T07Jz7a.png" />
-
 Missing features/TODO
 =====
 - Properties/tags
