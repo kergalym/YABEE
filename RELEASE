@@ -1,3 +1,9 @@
+------------- Release 15.0 ---------------
+* Added NormalMap Node support
+* Fixed NormalMapping for RenderPipeline
+* Various bugfixes.
+
+
 ------------- Release 14.9 ---------------
 * Added Automatic selection
 * Added Apply object transform

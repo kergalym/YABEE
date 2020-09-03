@@ -32,7 +32,6 @@ MERGE_ACTOR_MESH = None
 APPLY_MOD = None
 APPLY_COLL_TAG = None
 PVIEW = True
-EXPORT_PBS = False
 FORCE_EXPORT_VERTEX_COLORS = False
 USE_LOOP_NORMALS = False
 STRF = lambda x: '%.6f' % x
@@ -480,7 +479,15 @@ class EGGMeshObjectData(EGGBaseObjectData):
         for idx, uvl in enumerate(self.obj_ref.data.uv_layers):
             tangents = []
 
-            self.obj_ref.data.calc_tangents(uvmap=uvl.name)
+            try:
+                self.obj_ref.data.calc_tangents(uvmap=uvl.name)
+            except UnicodeDecodeError:
+                print("WARNING: Tangents aren't calculated. "
+                      "Fix the {0} UV layer!".format(self.obj_ref.name))
+                # import pdb; pdb.set_trace()
+                # uvl.name = "UVMap"
+                # self.obj_ref.data.calc_tangents(uvmap=uvl.name)
+                pass
 
             for loop in self.obj_ref.data.loops:
                 tangents.append(loop.tangent[:] + loop.bitangent[:])
@@ -645,6 +652,8 @@ class EGGMeshObjectData(EGGBaseObjectData):
             self.map_vertex_to_loop = {self.obj_ref.data.loops[lidx].vertex_index: lidx
                                        for p in self.obj_ref.data.polygons for lidx in p.loop_indices}
             normal = self.collect_vtx_normal_from_loop
+        else:
+            normal = self.collect_vtx_normal
 
         vertices = []
         idx = 0
@@ -707,7 +716,12 @@ class EGGMeshObjectData(EGGBaseObjectData):
                                 # and it connects to one of our known sockets...
                                 if link.to_node.name == "Principled BSDF":
                                     if link.to_socket.name in nodeNames.keys():
-                                        textureNode = link.from_node
+                                        # If normal map texture is connected through NormalMap node
+                                        if link.from_node.name == "Normal Map":
+                                            textureNode = link.from_node.inputs[1].links[0].from_node
+                                        else:
+                                            textureNode = link.from_node
+
                                         # we have to find the texture name here.
                                         nodeNames[link.to_socket.name] = textureNode.name
 
@@ -1150,6 +1164,10 @@ def get_egg_materials_str(object_names=None):
 
     mat_str = ''
     used_materials = get_used_materials(objects)
+
+    if not used_materials:
+        used_materials = ''
+
     print('INFO: Used materials: ', used_materials)
 
     containsPBRNodes = False
@@ -1171,33 +1189,59 @@ def get_egg_materials_str(object_names=None):
         if matIsFancyPBRNode:
             if matFancyType == 0:
                 objects = bpy.context.selected_objects
-                for node in bpy.data.materials[0].node_tree.nodes:
+
+                # Skip it due to issue https://developer.blender.org/T75888
+                if bpy.data.materials[m_idx].name == "Dots Stroke":
+                    print("WARNING: Can't export scene. Cancelled."
+                          "Please remove Dots Stroke material in the Blender File Mode first!\n\n")
+                    break
+
+                for node in bpy.data.materials[m_idx].node_tree.nodes:
                     if node.name == "Principled BSDF":
                         principled_bsdf = node
                         if not principled_bsdf.inputs["Base Color"].is_linked:
                             basecol = list(principled_bsdf.inputs["Base Color"].default_value)
                         else:
                             basecol = [1, 1, 1, 1]
+
                         if not principled_bsdf.inputs["Emission"].is_linked:
                             emission = list(principled_bsdf.inputs["Emission"].default_value)
                         else:
-                            emission = [1, 1, 1, 1]
+                            emission = [0, 0, 0, 0]
+
                         if not principled_bsdf.inputs["Specular"].is_linked:
                             specular = principled_bsdf.inputs["Specular"].default_value
                         else:
-                            specular = 1
+                            specular = 0
+
                         if not principled_bsdf.inputs["Metallic"].is_linked:
                             metallic = principled_bsdf.inputs["Metallic"].default_value
                         else:
-                            metallic = 1
+                            metallic = 0
+
                         if not principled_bsdf.inputs["Roughness"].is_linked:
+
                             roughness = principled_bsdf.inputs["Roughness"].default_value
                         else:
-                            roughness = 1
+                            roughness = 0
+
                         if not principled_bsdf.inputs["IOR"].is_linked:
                             ior = principled_bsdf.inputs["IOR"].default_value
                         else:
                             ior = 0
+
+                        normal_map_bump_factor = 0
+                        if principled_bsdf.inputs["Normal"].is_linked:
+                            if principled_bsdf.inputs["Normal"].links[0].from_node.name == "Normal Map":
+                                normal_map_node = principled_bsdf.inputs["Normal"].links[0].from_node
+                                if normal_map_node.inputs[0].name == "Strength":
+                                    normal_map_bump_factor = normal_map_node.inputs["Strength"].default_value
+
+                        # TODO: Do we neeed this for Blender 2.8?
+                        """if not principled_bsdf.inputs['Clearcoat'].is_linked:
+                            clearcoat = principled_bsdf.inputs['Clearcoat'].default_value
+                        else:
+                            clearcoat = 0"""
 
                         base_r = basecol[0]
                         base_g = basecol[1]
@@ -1205,7 +1249,7 @@ def get_egg_materials_str(object_names=None):
                         base_a = basecol[3]
 
                         emit_r = emission[0]
-                        emit_g = emission[1]
+                        emit_g = normal_map_bump_factor
                         emit_b = emission[2]
                         emit_a = emission[3]
 
@@ -1410,12 +1454,12 @@ def generate_shadow_uvs():
 def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
               copy_tex, t_path, tbs, tex_processor, b_layers, autoselect,
               apply_obj_transform, m_actor, apply_m, apply_coll_tag, pview,
-              loop_normals, export_pbs, force_export_vertex_colors, objects=None):
+              loop_normals, force_export_vertex_colors, objects=None):
     global FILE_PATH, ANIMATIONS, ANIMS_FROM_ACTIONS, EXPORT_UV_IMAGE_AS_TEXTURE, \
         COPY_TEX_FILES, TEX_PATH, SEPARATE_ANIM_FILE, ANIM_ONLY, \
         STRF, CALC_TBS, TEXTURE_PROCESSOR, BAKE_LAYERS, AUTOSELECT, APPLY_OBJ_TRANSFORM, \
         MERGE_ACTOR_MESH, APPLY_MOD, APPLY_COLL_TAG, PVIEW, USED_MATERIALS, USED_TEXTURES, \
-        USE_LOOP_NORMALS, EXPORT_PBS, FORCE_EXPORT_VERTEX_COLORS
+        USE_LOOP_NORMALS, FORCE_EXPORT_VERTEX_COLORS
     importlib.reload(sys.modules[lib_name + '.texture_processor'])
     importlib.reload(sys.modules[lib_name + '.utils'])
     errors = []
@@ -1438,7 +1482,6 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
     APPLY_COLL_TAG = apply_coll_tag
     PVIEW = pview
     USE_LOOP_NORMALS = loop_normals
-    EXPORT_PBS = export_pbs
     FORCE_EXPORT_VERTEX_COLORS = force_export_vertex_colors
     s_acc = '%.6f'
 
@@ -1574,14 +1617,6 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
         print('Objects for export:', [obj.yabee_name for obj in obj_list])
 
         errors += gr.make_hierarchy_from_list(obj_list)
-
-        if EXPORT_PBS:
-            # TODO: Implement export to bam format
-            """from .yabee_bam_writer import yabee_bam_writer
-            bam_export_path = os.path.split(os.path.abspath(FILE_PATH))
-            yabee_bam_writer(objects=obj_list,
-                             materials=selected_obj,
-                             path=bam_export_path)"""
 
         if not errors:
             # gr.print_hierarchy()

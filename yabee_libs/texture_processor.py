@@ -46,25 +46,38 @@ class PbrTextures:
                         mat = obj.data.materials[f.material_index]
                         if not mat or mat in handled:
                             continue
-                        # print("found new material")
+
                         handled.add(mat)
 
                         nodeNames = {"Base Color": None,
-                                     "Normal": None,
+                                     "Specular": None,
                                      "Roughness": None,
-                                     "Specular": None}
+                                     "Normal": None}
+
                         # let's crawl all links, find the ones connected to the PandaPBRNode,
                         # find the connected textures, use them.
                         for link in mat.node_tree.links:
                             # if the link connects to the Panda3D compatible node
+
                             if link.to_node.name == "Principled BSDF":
                                 print("INFO: Found the Panda3D compatible Principled BSDF shader")
                                 # and it connects to one of our known sockets...
 
-                                # textureNode = None
                                 if link.to_socket.name in nodeNames.keys():
                                     textureNode = link.from_node
 
+                                    # If normal map texture is connected through NormalMap node
+                                    # (we need it to get strength for RenderPipeline)
+                                    if not hasattr(textureNode, 'image'):
+                                        if textureNode.type == "NORMAL_MAP":
+                                            if (link.from_node.name == "Normal Map"
+                                                    and link.from_node.inputs[1].is_linked):
+                                                print("INFO: Texture node assigned through NormalMap node.",
+                                                      obj.name, link.from_node.name)
+
+                                                textureNode = link.from_node.inputs[1].links[0].from_node
+
+                                    # If normal map texture is connected directly
                                     if hasattr(textureNode, 'image'):
                                         if not textureNode.image:
                                             print("WARNING: Texture node has no image assigned!", obj.name,
@@ -75,7 +88,6 @@ class PbrTextures:
                                         if (link.to_socket.name == 'Base Color'
                                                 and link.to_node.inputs[0].is_linked):
                                             if textureNode.image.colorspace_settings.name == 'sRGB':
-
                                                 if textureNode.image.channels == 3:
                                                     scalars.append(('format', 'rgb'))
                                                 elif textureNode.image.channels == 4:
@@ -83,14 +95,14 @@ class PbrTextures:
 
                                             scalars.append(('envtype', 'modulate'))
 
-                                        elif (link.to_socket.name == 'Normal'
-                                              and link.from_node.outputs[0].is_linked):
-                                            scalars.append(('format', 'rgb'))
-                                            scalars.append(('envtype', 'normal'))
-
                                         elif (link.to_socket.name == 'Roughness'
                                               and link.from_node.outputs[0].is_linked):
                                             scalars.append(('format', 'rgb'))
+
+                                        elif (link.to_socket.name == 'Normal'
+                                                and link.from_node.outputs[0].is_linked):
+                                            scalars.append(('format', 'rgb'))
+                                            scalars.append(('envtype', 'normal'))
 
                                         # Make unique named Image Texture node by assigning the texture name
                                         # so we can use multiple textures for multimeshed object
@@ -99,7 +111,7 @@ class PbrTextures:
                                             print("INFO: {} node is renamed to {}".format(textureNode.name,
                                                                                           textureNode.image.name))
 
-                                        if (textureNode.inputs[0].is_linked is False
+                                        if ( not textureNode.inputs[0].is_linked
                                                 and textureNode.image):
                                             print("WARNING: Texture has no UV-INPUT!", obj.name,
                                                   link.to_socket.name)
@@ -122,7 +134,7 @@ class PbrTextures:
                                                     scalars.append(('uv-name', uv_map.pop()))
 
                                         t_path = textureNode.image.filepath
-                                        if self.copy_tex:
+                                        if textureNode.image and self.copy_tex:
                                             t_path = save_image(textureNode.image, self.file_path, self.tex_path)
 
                                         transform = []
@@ -148,7 +160,8 @@ class PbrTextures:
 
                                         # Process coordinate mapping using a matrix.
                                         mappings = (
-                                            textureNode.texture_mapping.mapping_x, textureNode.texture_mapping.mapping_y,
+                                            textureNode.texture_mapping.mapping_x,
+                                            textureNode.texture_mapping.mapping_y,
                                             textureNode.texture_mapping.mapping_z)
 
                                         if mappings != ('X', 'Y', 'Z'):
