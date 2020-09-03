@@ -1,8 +1,11 @@
+------------- Release 15.1 ---------------
+* New option Set Texture Format
+* Various bugfixes.
+
 ------------- Release 15.0 ---------------
 * Added NormalMap Node support
 * Fixed NormalMapping for RenderPipeline
 * Various bugfixes.
-
 
 ------------- Release 14.9 ---------------
 * Added Automatic selection

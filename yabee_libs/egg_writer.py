@@ -1,5 +1,6 @@
 """ Part of the YABEE
 """
+from pathlib import Path
 
 from mathutils import *
 from math import pi
@@ -33,6 +34,7 @@ APPLY_MOD = None
 APPLY_COLL_TAG = None
 PVIEW = True
 FORCE_EXPORT_VERTEX_COLORS = False
+SET_TEX_FORMAT = False
 USE_LOOP_NORMALS = False
 STRF = lambda x: '%.6f' % x
 USED_MATERIALS = None
@@ -1454,12 +1456,12 @@ def generate_shadow_uvs():
 def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
               copy_tex, t_path, tbs, tex_processor, b_layers, autoselect,
               apply_obj_transform, m_actor, apply_m, apply_coll_tag, pview,
-              loop_normals, force_export_vertex_colors, objects=None):
+              loop_normals, force_export_vertex_colors, set_tex_format, objects=None):
     global FILE_PATH, ANIMATIONS, ANIMS_FROM_ACTIONS, EXPORT_UV_IMAGE_AS_TEXTURE, \
         COPY_TEX_FILES, TEX_PATH, SEPARATE_ANIM_FILE, ANIM_ONLY, \
         STRF, CALC_TBS, TEXTURE_PROCESSOR, BAKE_LAYERS, AUTOSELECT, APPLY_OBJ_TRANSFORM, \
         MERGE_ACTOR_MESH, APPLY_MOD, APPLY_COLL_TAG, PVIEW, USED_MATERIALS, USED_TEXTURES, \
-        USE_LOOP_NORMALS, FORCE_EXPORT_VERTEX_COLORS
+        USE_LOOP_NORMALS, FORCE_EXPORT_VERTEX_COLORS, SET_TEX_FORMAT
     importlib.reload(sys.modules[lib_name + '.texture_processor'])
     importlib.reload(sys.modules[lib_name + '.utils'])
     errors = []
@@ -1483,6 +1485,7 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
     PVIEW = pview
     USE_LOOP_NORMALS = loop_normals
     FORCE_EXPORT_VERTEX_COLORS = force_export_vertex_colors
+    SET_TEX_FORMAT = set_tex_format
     s_acc = '%.6f'
 
     def str_f(x):
@@ -1683,6 +1686,22 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
                         print(line)
                 except:
                     print('ERROR: Can\'t calculate TBS through panda\'s egg-trans')
+
+            if SET_TEX_FORMAT:
+                if FILE_PATH:
+                    with open("/tmp/yabee_exported", "w") as f:
+                        f.write(str(FILE_PATH))
+
+                path = os.path.dirname(__file__)
+                try:
+                    if path:
+                        subprocess.call(["python", "{0}/egg_worker.py".format(path)])
+                except:
+                    print("ERROR: Can't find egg_worker.py")
+
+                if "{0}.bam".format(FILE_PATH):
+                    print("File {0}.bam is successfully created".format(FILE_PATH))
+
             if PVIEW:
                 try:
                     fp = os.path.abspath(FILE_PATH)
