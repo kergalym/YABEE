@@ -163,12 +163,6 @@ class YABEEProperty(bpy.types.PropertyGroup):
         default=False,
     )
 
-    opt_export_pbs: BoolProperty(
-        name="Export PBS",
-        description="Export Physically Based Properties, requires the BAM Exporter",
-        default=False
-    )
-
     opt_force_export_vertex_colors: BoolProperty(
         name="Force export vertex colors",
         description="when False, writes only vertex color if polygon material is using it ",
@@ -239,7 +233,6 @@ class YABEEProperty(bpy.types.PropertyGroup):
             layout.row().prop(self, 'opt_pview')
             layout.row().prop(self, 'opt_use_loop_normals')
 
-            layout.row().prop(self, 'opt_export_pbs')
             layout.row().prop(self, 'opt_force_export_vertex_colors')
 
     def get_bake_dict(self):
@@ -296,14 +289,13 @@ class YABEEProperty(bpy.types.PropertyGroup):
         self.opt_separate_anim_files = True
         self.opt_anim_only = False
         self.opt_tex_path = './tex'
-        self.opt_autoselect = True
-        self.opt_apply_object_transform = True
+        self.opt_autoselect = False
+        self.opt_apply_object_transform = False
         self.opt_merge_actor = True
         self.opt_apply_modifiers = True
         self.opt_apply_collide_tag = False
         self.opt_pview = False
         self.opt_use_loop_normals = False
-        self.opt_export_pbs = False
         self.opt_force_export_vertex_colors = False
         while self.opt_anim_list.anim_collection[:]:
             bpy.ops.export.egg_anim_remove('INVOKE_DEFAULT')
@@ -415,7 +407,6 @@ class ExportPanda3DEGG(bpy.types.Operator, ExportHelper):
                                       sett.opt_apply_collide_tag,
                                       sett.opt_pview,
                                       sett.opt_use_loop_normals,
-                                      sett.opt_export_pbs,
                                       sett.opt_force_export_vertex_colors)
         if not errors:
             return {'FINISHED'}
