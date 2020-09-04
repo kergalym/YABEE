@@ -1,3 +1,7 @@
+------------- Release 15.2 ---------------
+* Fixed normals for smooth and flat shading
+* Various bugfixes.
+
 ------------- Release 15.1 ---------------
 * New option Set Texture Format
 * Various bugfixes.

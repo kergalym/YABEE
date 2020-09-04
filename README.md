@@ -1,7 +1,7 @@
 ![logo](http://i.imgur.com/lVMTcfS.png)
 
 
-YABEE 15.1
+YABEE 15.2
 =====
 Renewed Egg exporter for Blender 2.8 and Panda3D
 
@@ -19,7 +19,7 @@ New minor features
 =====
 - Automatic selection
 - Apply object transform
-- Set texture format to RGB or RGBA
+- Set texture format to RGB or RGBA (with saving in .bam file)
 
 **These features activated by default**, uncheck them first if you don't use them and manually select your object(s).
 **Automatic selection** automatically selects all objects in the scene. 

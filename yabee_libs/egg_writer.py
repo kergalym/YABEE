@@ -425,6 +425,7 @@ class EGGMeshObjectData(EGGBaseObjectData):
                     vtx_list.append(v)
         vtx_list = set(vtx_list)
 
+        # TODO: Fix me!
         if self.obj_ref.data.use_auto_smooth:
             sharp_edges = [e.key for e in self.obj_ref.data.edges if e.use_edge_sharp]
             for i, f in enumerate(self.obj_ref.data.polygons):
@@ -486,9 +487,6 @@ class EGGMeshObjectData(EGGBaseObjectData):
             except UnicodeDecodeError:
                 print("WARNING: Tangents aren't calculated. "
                       "Fix the {0} UV layer!".format(self.obj_ref.name))
-                # import pdb; pdb.set_trace()
-                # uvl.name = "UVMap"
-                # self.obj_ref.data.calc_tangents(uvmap=uvl.name)
                 pass
 
             for loop in self.obj_ref.data.loops:
@@ -574,11 +572,11 @@ class EGGMeshObjectData(EGGBaseObjectData):
         @return: list of vertex attributes.
         """
         if idx in self.smooth_vtx_list:
+
             no = self.obj_ref.matrix_world.to_euler().to_matrix() @ self.obj_ref.data.vertices[v].normal
             # no = self.obj_ref.data.vertices[v].normal
             # no = self.obj_ref.data.loops[idx].normal
             attributes.append('  <Normal> { %f %f %f }' % no[:])
-
         return attributes
 
     def collect_vtx_normal_from_loop(self, v, idx, attributes):
@@ -645,7 +643,6 @@ class EGGMeshObjectData(EGGBaseObjectData):
         """
         xyz = self.collect_vtx_xyz
         dxyz = self.collect_vtx_dxyz
-        normal = self.collect_vtx_normal
         rgba = self.collect_vtx_rgba
         uv = self.collect_vtx_uv
 
@@ -666,9 +663,9 @@ class EGGMeshObjectData(EGGBaseObjectData):
                 attributes = []
                 xyz(v, attributes)
                 dxyz(v, attributes)
-                uv(v, idx, attributes)
                 normal(v, idx, attributes)
                 rgba(idx, f, attributes)
+                uv(v, idx, attributes)
                 str_attr = '\n'.join(attributes)
                 vtx = '\n<Vertex> %i {%s\n}' % (idx, str_attr)
                 vertices.append(vtx)
@@ -1227,10 +1224,10 @@ def get_egg_materials_str(object_names=None):
                         else:
                             roughness = 0
 
-                        if not principled_bsdf.inputs["IOR"].is_linked:
+                        """if not principled_bsdf.inputs["IOR"].is_linked:
                             ior = principled_bsdf.inputs["IOR"].default_value
                         else:
-                            ior = 0
+                            ior = 0"""
 
                         normal_map_bump_factor = 0
                         if principled_bsdf.inputs["Normal"].is_linked:
@@ -1266,7 +1263,7 @@ def get_egg_materials_str(object_names=None):
                         mat_str += '  <Scalar> shininess { %s }\n' % str(specular)
                         mat_str += '  <Scalar> roughness { %s }\n' % str(roughness)
                         mat_str += '  <Scalar> metallic { %s }\n' % str(metallic)
-                        mat_str += '  <Scalar> ior { %s }\n' % str(ior)
+                        # mat_str += '  <Scalar> ior { %s }\n' % str(ior)
                         mat_str += '  <Scalar> local { %s }\n' % str(0)
 
         if matIsFancyPBRNode is False:
@@ -1635,9 +1632,13 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
                 file = open(FILE_PATH, 'w')
             if not ANIM_ONLY:
                 file.write('<CoordinateSystem> { Z-up } \n')
-                materials_str, USED_MATERIALS, USED_TEXTURES = get_egg_materials_str(selected_obj)
-                file.write(materials_str)
-                file.write(gr.get_full_egg_str())
+                if selected_obj:
+                    materials_str, USED_MATERIALS, USED_TEXTURES = get_egg_materials_str(selected_obj)
+                    file.write(materials_str)
+                    file.write(gr.get_full_egg_str())
+                else:
+                    exit("WARNING: No object is selected! Exiting...")
+
 
             anim_collectors = []
             if ANIMS_FROM_ACTIONS:
