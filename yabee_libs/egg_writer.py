@@ -71,12 +71,12 @@ class Group:
                 self._yabee_object = EGGBaseObjectData(self.object)
 
     def update_joints_data(self, actor_data_list=None):
-        if actor_data_list == None:
+        if actor_data_list is None:
             actor_data_list = []
             hierarchy_to_list(self, actor_data_list, base_filter=EGGActorObjectData)
             # print(tmp)
-        if not self._yabee_object and self.object \
-                and self.object.__class__ == bpy.types.Bone:
+        if (not self._yabee_object and self.object
+                and self.object.__class__ == bpy.types.Bone):
             vref = []
             for ad in actor_data_list:
                 if self.object.name in ad._yabee_object.joint_vtx_ref.keys():
@@ -103,8 +103,9 @@ class Group:
         # ACHTUNG!!! Be careful: If we have two armatures with the
         # same bones name and object, attached to it,
         # then we can get unexpected results!
-        if o.__class__ != bpy.types.Bone and o.parent_type == 'BONE' \
-                and p and o.parent_bone == p.name:
+        if (o.__class__ != bpy.types.Bone
+                and o.parent_type == 'BONE'
+                and p and o.parent_bone == p.name):
             return 3
         return 0
 
@@ -116,8 +117,8 @@ class Group:
         @param obj_list: tuple or lis of blender's objects.
         """
         try:
-            if self.object and self.object.__class__ != bpy.types.Bone and \
-                    self.object.type == 'ARMATURE':
+            if (self.object and self.object.__class__ != bpy.types.Bone
+                    and self.object.type == 'ARMATURE'):
                 obj_list += self.object.data.bones
                 for bone in self.object.data.bones:
                     if not bone.parent:
@@ -181,9 +182,9 @@ class Group:
                 if not APPLY_COLL_TAG:
                     egg_str.append('%s<Group> %s {\n' % ('  ' * level, eggSafeName(self.object.yabee_name)))
 
-                if self.object.type == 'MESH' \
-                        and (self.object.data.shape_keys \
-                             and len(self.object.data.shape_keys.key_blocks) > 1):
+                if (self.object.type == 'MESH'
+                        and (self.object.data.shape_keys
+                             and len(self.object.data.shape_keys.key_blocks) > 1)):
                     egg_str.append('%s<Dart> { 1 }\n' % ('  ' * (level + 1)))
                 elif self.object.type == 'ARMATURE':
                     egg_str.append('%s<Dart> { 1 }\n' % ('  ' * (level + 1)))
@@ -294,7 +295,7 @@ class EGGNurbsCurveObjectData(EGGBaseObjectData):
         return vtx_pool
 
     def get_curves_str(self):
-        """ Return the <NURBSCurve> string. Blender 2.5 has not contain
+        """ Return the <NURBSCurve> string. Blender 2.5+ has not contain
         Knots information, seems it's calculating in runtime.
         I got algorythm for the knots calculation from the OBJ exporter
         and modified it.
@@ -347,10 +348,15 @@ class EGGJointObjectData(EGGBaseObjectData):
     def get_vref_str(self):
         """ Convert vertex reference to the EGG string and return it.
         """
-        # print('GET VREF')
         vref_str = ''
         for meshes in self.vref:
             for vpool, data in meshes.items():
+
+                # Do escape for any white space here,
+                # don't change string placeholders in the loops below.
+                if vpool:
+                    vpool = vpool.replace(vpool, '"{0}"'.format(vpool))
+
                 weightgroups = {}
                 for idx, weight in data:
                     # wstr = '%s' % STRF(weight)
