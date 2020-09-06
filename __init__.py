@@ -124,7 +124,7 @@ class YABEEProperty(bpy.types.PropertyGroup):
     opt_autoselect: BoolProperty(
         name="Automatic selection",
         description="Automatically select all objects in the scene",
-        default=False,
+        default=True,
     )
 
     opt_apply_object_transform: BoolProperty(
@@ -166,6 +166,12 @@ class YABEEProperty(bpy.types.PropertyGroup):
     opt_force_export_vertex_colors: BoolProperty(
         name="Force export vertex colors",
         description="when False, writes only vertex color if polygon material is using it ",
+        default=False,
+    )
+
+    opt_set_tex_format: BoolProperty(
+        name="Set texture format",
+        description="Setting the texture format to RGB or RGBA",
         default=False,
     )
 
@@ -232,8 +238,8 @@ class YABEEProperty(bpy.types.PropertyGroup):
             layout.row().prop(self, 'opt_apply_collide_tag')
             layout.row().prop(self, 'opt_pview')
             layout.row().prop(self, 'opt_use_loop_normals')
-
             layout.row().prop(self, 'opt_force_export_vertex_colors')
+            layout.row().prop(self, 'opt_set_tex_format')
 
     def get_bake_dict(self):
         d = {}
@@ -297,6 +303,8 @@ class YABEEProperty(bpy.types.PropertyGroup):
         self.opt_pview = False
         self.opt_use_loop_normals = False
         self.opt_force_export_vertex_colors = False
+        self.opt_set_tex_format = False
+
         while self.opt_anim_list.anim_collection[:]:
             bpy.ops.export.egg_anim_remove('INVOKE_DEFAULT')
         self.first_run = False
@@ -407,7 +415,8 @@ class ExportPanda3DEGG(bpy.types.Operator, ExportHelper):
                                       sett.opt_apply_collide_tag,
                                       sett.opt_pview,
                                       sett.opt_use_loop_normals,
-                                      sett.opt_force_export_vertex_colors)
+                                      sett.opt_force_export_vertex_colors,
+                                      sett.opt_set_tex_format)
         if not errors:
             return {'FINISHED'}
         else:

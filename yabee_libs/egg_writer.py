@@ -1,5 +1,6 @@
 """ Part of the YABEE
 """
+from pathlib import Path
 
 from mathutils import *
 from math import pi
@@ -33,6 +34,7 @@ APPLY_MOD = None
 APPLY_COLL_TAG = None
 PVIEW = True
 FORCE_EXPORT_VERTEX_COLORS = False
+SET_TEX_FORMAT = False
 USE_LOOP_NORMALS = False
 STRF = lambda x: '%.6f' % x
 USED_MATERIALS = None
@@ -69,12 +71,12 @@ class Group:
                 self._yabee_object = EGGBaseObjectData(self.object)
 
     def update_joints_data(self, actor_data_list=None):
-        if actor_data_list == None:
+        if actor_data_list is None:
             actor_data_list = []
             hierarchy_to_list(self, actor_data_list, base_filter=EGGActorObjectData)
             # print(tmp)
-        if not self._yabee_object and self.object \
-                and self.object.__class__ == bpy.types.Bone:
+        if (not self._yabee_object and self.object
+                and self.object.__class__ == bpy.types.Bone):
             vref = []
             for ad in actor_data_list:
                 if self.object.name in ad._yabee_object.joint_vtx_ref.keys():
@@ -101,8 +103,9 @@ class Group:
         # ACHTUNG!!! Be careful: If we have two armatures with the
         # same bones name and object, attached to it,
         # then we can get unexpected results!
-        if o.__class__ != bpy.types.Bone and o.parent_type == 'BONE' \
-                and p and o.parent_bone == p.name:
+        if (o.__class__ != bpy.types.Bone
+                and o.parent_type == 'BONE'
+                and p and o.parent_bone == p.name):
             return 3
         return 0
 
@@ -114,8 +117,8 @@ class Group:
         @param obj_list: tuple or lis of blender's objects.
         """
         try:
-            if self.object and self.object.__class__ != bpy.types.Bone and \
-                    self.object.type == 'ARMATURE':
+            if (self.object and self.object.__class__ != bpy.types.Bone
+                    and self.object.type == 'ARMATURE'):
                 obj_list += self.object.data.bones
                 for bone in self.object.data.bones:
                     if not bone.parent:
@@ -179,9 +182,9 @@ class Group:
                 if not APPLY_COLL_TAG:
                     egg_str.append('%s<Group> %s {\n' % ('  ' * level, eggSafeName(self.object.yabee_name)))
 
-                if self.object.type == 'MESH' \
-                        and (self.object.data.shape_keys \
-                             and len(self.object.data.shape_keys.key_blocks) > 1):
+                if (self.object.type == 'MESH'
+                        and (self.object.data.shape_keys
+                             and len(self.object.data.shape_keys.key_blocks) > 1)):
                     egg_str.append('%s<Dart> { 1 }\n' % ('  ' * (level + 1)))
                 elif self.object.type == 'ARMATURE':
                     egg_str.append('%s<Dart> { 1 }\n' % ('  ' * (level + 1)))
@@ -292,7 +295,7 @@ class EGGNurbsCurveObjectData(EGGBaseObjectData):
         return vtx_pool
 
     def get_curves_str(self):
-        """ Return the <NURBSCurve> string. Blender 2.5 has not contain
+        """ Return the <NURBSCurve> string. Blender 2.5+ has not contain
         Knots information, seems it's calculating in runtime.
         I got algorythm for the knots calculation from the OBJ exporter
         and modified it.
@@ -345,10 +348,15 @@ class EGGJointObjectData(EGGBaseObjectData):
     def get_vref_str(self):
         """ Convert vertex reference to the EGG string and return it.
         """
-        # print('GET VREF')
         vref_str = ''
         for meshes in self.vref:
             for vpool, data in meshes.items():
+
+                # Do escape for any white space here,
+                # don't change string placeholders in the loops below.
+                if vpool:
+                    vpool = vpool.replace(vpool, '"{0}"'.format(vpool))
+
                 weightgroups = {}
                 for idx, weight in data:
                     # wstr = '%s' % STRF(weight)
@@ -423,6 +431,7 @@ class EGGMeshObjectData(EGGBaseObjectData):
                     vtx_list.append(v)
         vtx_list = set(vtx_list)
 
+        # TODO: Fix me!
         if self.obj_ref.data.use_auto_smooth:
             sharp_edges = [e.key for e in self.obj_ref.data.edges if e.use_edge_sharp]
             for i, f in enumerate(self.obj_ref.data.polygons):
@@ -484,9 +493,6 @@ class EGGMeshObjectData(EGGBaseObjectData):
             except UnicodeDecodeError:
                 print("WARNING: Tangents aren't calculated. "
                       "Fix the {0} UV layer!".format(self.obj_ref.name))
-                # import pdb; pdb.set_trace()
-                # uvl.name = "UVMap"
-                # self.obj_ref.data.calc_tangents(uvmap=uvl.name)
                 pass
 
             for loop in self.obj_ref.data.loops:
@@ -572,11 +578,11 @@ class EGGMeshObjectData(EGGBaseObjectData):
         @return: list of vertex attributes.
         """
         if idx in self.smooth_vtx_list:
+
             no = self.obj_ref.matrix_world.to_euler().to_matrix() @ self.obj_ref.data.vertices[v].normal
             # no = self.obj_ref.data.vertices[v].normal
             # no = self.obj_ref.data.loops[idx].normal
             attributes.append('  <Normal> { %f %f %f }' % no[:])
-
         return attributes
 
     def collect_vtx_normal_from_loop(self, v, idx, attributes):
@@ -643,7 +649,6 @@ class EGGMeshObjectData(EGGBaseObjectData):
         """
         xyz = self.collect_vtx_xyz
         dxyz = self.collect_vtx_dxyz
-        normal = self.collect_vtx_normal
         rgba = self.collect_vtx_rgba
         uv = self.collect_vtx_uv
 
@@ -664,9 +669,9 @@ class EGGMeshObjectData(EGGBaseObjectData):
                 attributes = []
                 xyz(v, attributes)
                 dxyz(v, attributes)
-                uv(v, idx, attributes)
                 normal(v, idx, attributes)
                 rgba(idx, f, attributes)
+                uv(v, idx, attributes)
                 str_attr = '\n'.join(attributes)
                 vtx = '\n<Vertex> %i {%s\n}' % (idx, str_attr)
                 vertices.append(vtx)
@@ -1225,10 +1230,10 @@ def get_egg_materials_str(object_names=None):
                         else:
                             roughness = 0
 
-                        if not principled_bsdf.inputs["IOR"].is_linked:
+                        """if not principled_bsdf.inputs["IOR"].is_linked:
                             ior = principled_bsdf.inputs["IOR"].default_value
                         else:
-                            ior = 0
+                            ior = 0"""
 
                         normal_map_bump_factor = 0
                         if principled_bsdf.inputs["Normal"].is_linked:
@@ -1264,7 +1269,7 @@ def get_egg_materials_str(object_names=None):
                         mat_str += '  <Scalar> shininess { %s }\n' % str(specular)
                         mat_str += '  <Scalar> roughness { %s }\n' % str(roughness)
                         mat_str += '  <Scalar> metallic { %s }\n' % str(metallic)
-                        mat_str += '  <Scalar> ior { %s }\n' % str(ior)
+                        # mat_str += '  <Scalar> ior { %s }\n' % str(ior)
                         mat_str += '  <Scalar> local { %s }\n' % str(0)
 
         if matIsFancyPBRNode is False:
@@ -1454,12 +1459,12 @@ def generate_shadow_uvs():
 def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
               copy_tex, t_path, tbs, tex_processor, b_layers, autoselect,
               apply_obj_transform, m_actor, apply_m, apply_coll_tag, pview,
-              loop_normals, force_export_vertex_colors, objects=None):
+              loop_normals, force_export_vertex_colors, set_tex_format, objects=None):
     global FILE_PATH, ANIMATIONS, ANIMS_FROM_ACTIONS, EXPORT_UV_IMAGE_AS_TEXTURE, \
         COPY_TEX_FILES, TEX_PATH, SEPARATE_ANIM_FILE, ANIM_ONLY, \
         STRF, CALC_TBS, TEXTURE_PROCESSOR, BAKE_LAYERS, AUTOSELECT, APPLY_OBJ_TRANSFORM, \
         MERGE_ACTOR_MESH, APPLY_MOD, APPLY_COLL_TAG, PVIEW, USED_MATERIALS, USED_TEXTURES, \
-        USE_LOOP_NORMALS, FORCE_EXPORT_VERTEX_COLORS
+        USE_LOOP_NORMALS, FORCE_EXPORT_VERTEX_COLORS, SET_TEX_FORMAT
     importlib.reload(sys.modules[lib_name + '.texture_processor'])
     importlib.reload(sys.modules[lib_name + '.utils'])
     errors = []
@@ -1483,6 +1488,7 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
     PVIEW = pview
     USE_LOOP_NORMALS = loop_normals
     FORCE_EXPORT_VERTEX_COLORS = force_export_vertex_colors
+    SET_TEX_FORMAT = set_tex_format
     s_acc = '%.6f'
 
     def str_f(x):
@@ -1632,9 +1638,13 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
                 file = open(FILE_PATH, 'w')
             if not ANIM_ONLY:
                 file.write('<CoordinateSystem> { Z-up } \n')
-                materials_str, USED_MATERIALS, USED_TEXTURES = get_egg_materials_str(selected_obj)
-                file.write(materials_str)
-                file.write(gr.get_full_egg_str())
+                if selected_obj:
+                    materials_str, USED_MATERIALS, USED_TEXTURES = get_egg_materials_str(selected_obj)
+                    file.write(materials_str)
+                    file.write(gr.get_full_egg_str())
+                else:
+                    exit("WARNING: No object is selected! Exiting...")
+
 
             anim_collectors = []
             if ANIMS_FROM_ACTIONS:
@@ -1683,6 +1693,22 @@ def write_out(fname, anims, from_actions, uv_img_as_tex, sep_anim, a_only,
                         print(line)
                 except:
                     print('ERROR: Can\'t calculate TBS through panda\'s egg-trans')
+
+            if SET_TEX_FORMAT:
+                if FILE_PATH:
+                    with open("/tmp/yabee_exported", "w") as f:
+                        f.write(str(FILE_PATH))
+
+                path = os.path.dirname(__file__)
+                try:
+                    if path:
+                        subprocess.call(["python", "{0}/egg_worker.py".format(path)])
+                except:
+                    print("ERROR: Can't find egg_worker.py")
+
+                if "{0}.bam".format(FILE_PATH):
+                    print("File {0}.bam is successfully created".format(FILE_PATH))
+
             if PVIEW:
                 try:
                     fp = os.path.abspath(FILE_PATH)

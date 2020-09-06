@@ -87,21 +87,10 @@ class PbrTextures:
 
                                         if (link.to_socket.name == 'Base Color'
                                                 and link.to_node.inputs[0].is_linked):
-                                            if textureNode.image.colorspace_settings.name == 'sRGB':
-                                                if textureNode.image.channels == 3:
-                                                    scalars.append(('format', 'rgb'))
-                                                elif textureNode.image.channels == 4:
-                                                    scalars.append(('format', 'rgba'))
-
                                             scalars.append(('envtype', 'modulate'))
-
-                                        elif (link.to_socket.name == 'Roughness'
-                                              and link.from_node.outputs[0].is_linked):
-                                            scalars.append(('format', 'rgb'))
 
                                         elif (link.to_socket.name == 'Normal'
                                                 and link.from_node.outputs[0].is_linked):
-                                            scalars.append(('format', 'rgb'))
                                             scalars.append(('envtype', 'normal'))
 
                                         # Make unique named Image Texture node by assigning the texture name
