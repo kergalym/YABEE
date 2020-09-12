@@ -43,7 +43,7 @@ in Panda3D it was possible to extend YABEE to improve the workflow for artists w
 <p style="font-size: small">Normal mapping Setup for Panda3D (with TBS option)</p>
 
 <img src="https://i.imgur.com/lndfqdr.jpg" />
-<p style="font-size: small">Normal mapping Setup for Panda3D + RenderPipeline (with TBS option)</p>
+<p style="font-size: small">Normal mapping Setup for Panda3D + RenderPipeline</p>
 
 To use it, you have to create a material for your mesh, set up the Principled BSDF shader 
 by connecting at least the Image Texture shader and optionally UV Map.
