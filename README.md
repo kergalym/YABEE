@@ -21,7 +21,7 @@ New minor features
 - Apply object transform
 - Set texture format to RGB or RGBA (with saving a model to .bam file in /tmp directory)
 
-**These features activated by default**, uncheck them first if you don't use them and manually select your object(s).
+**Some of these features could be activated by default**, uncheck them first if you don't use them and manually select your object(s).
 **Automatic selection** automatically selects all objects in the scene. 
 **Apply object transform** will change **only copy** of the scene prepared for an export.
 
