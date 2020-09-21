@@ -1,3 +1,8 @@
+------------- Release 15.3 ---------------
+* Removed useless feature "Set texture format".
+Use setFormat() method from Panda3D API instead.
+* Various bugfixes.
+
 ------------- Release 15.2 ---------------
 * Fixed normals for smooth and flat shading
 * Various bugfixes.
