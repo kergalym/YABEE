@@ -1,3 +1,6 @@
+------------- Release 15.4 ---------------
+* Added support for Blender "BackFace Culling" feature.
+
 ------------- Release 15.3 ---------------
 * Removed useless feature "Set texture format".
 Use setFormat() method from Panda3D API instead.

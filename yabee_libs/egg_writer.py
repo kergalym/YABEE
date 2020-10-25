@@ -391,6 +391,7 @@ class EGGMeshObjectData(EGGBaseObjectData):
         self.colors_vtx_ref = self.pre_convert_vtx_color()
         self.uvs_list = self.pre_convert_uvs()
         self.tangent_layers = None
+
         if CALC_TBS == 'BLENDER':
             self.tangent_layers = self.pre_calc_TBS()
 
@@ -807,7 +808,7 @@ class EGGMeshObjectData(EGGBaseObjectData):
             if not self.obj_ref.data.materials[face.material_index]:
                 return attributes
 
-            if not self.obj_ref.data.materials[face.material_index].use_backface_culling:
+            if self.obj_ref.data.materials[face.material_index].use_backface_culling:
                 attributes.append('<BFace> { 1 }')
         return attributes
 
@@ -830,7 +831,7 @@ class EGGMeshObjectData(EGGBaseObjectData):
         mref = self.collect_poly_mref
         normal = self.collect_poly_normal
         rgba = self.collect_poly_rgba
-        # bface = self.collect_poly_bface
+        bface = self.collect_poly_bface
         vertexref = self.collect_poly_vertexref
         polygons = []
         for f in self.obj_ref.data.polygons:
@@ -838,7 +839,7 @@ class EGGMeshObjectData(EGGBaseObjectData):
             tref(f, attributes)
             mref(f, attributes)
             normal(f, attributes)
-            # bface(f, attributes)
+            bface(f, attributes)
             rgba(f, attributes)
             vertexref(f, attributes)
             poly = '<Polygon> {\n  %s \n}\n' % ('\n  '.join(attributes),)

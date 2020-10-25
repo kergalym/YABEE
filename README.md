@@ -1,7 +1,7 @@
 ![logo](http://i.imgur.com/lVMTcfS.png)
 
 
-YABEE 15.3
+YABEE 15.4
 =====
 Renewed Egg exporter for Blender 2.8 and Panda3D
 
@@ -19,6 +19,7 @@ New minor features
 =====
 - Automatic selection
 - Apply object transform
+- Blender "BackFace Culling" feature (fixed)
 
 **Some of these features could be activated by default**, uncheck them first if you don't use them and manually select your object(s).
 **Automatic selection** automatically selects all objects in the scene. 
