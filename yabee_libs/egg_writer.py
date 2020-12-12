@@ -1222,7 +1222,7 @@ def get_egg_materials_str(object_names=None):
                         if not principled_bsdf.inputs["Metallic"].is_linked:
                             metallic = principled_bsdf.inputs["Metallic"].default_value
                         else:
-                            metallic = 0
+                            metallic = principled_bsdf.inputs["Metallic"].default_value
 
                         if not principled_bsdf.inputs["Roughness"].is_linked:
 
@@ -1230,10 +1230,10 @@ def get_egg_materials_str(object_names=None):
                         else:
                             roughness = 0
 
-                        """if not principled_bsdf.inputs["IOR"].is_linked:
+                        if not principled_bsdf.inputs["IOR"].is_linked:
                             ior = principled_bsdf.inputs["IOR"].default_value
                         else:
-                            ior = 0"""
+                            ior = principled_bsdf.inputs["IOR"].default_value
 
                         normal_map_bump_factor = 0
                         if principled_bsdf.inputs["Normal"].is_linked:
@@ -1261,15 +1261,15 @@ def get_egg_materials_str(object_names=None):
                         mat_str += '  <Scalar> baser { %s }\n' % str(base_r)
                         mat_str += '  <Scalar> baseg { %s }\n' % str(base_g)
                         mat_str += '  <Scalar> baseb { %s }\n' % str(base_b)
-                        mat_str += '  <Scalar> basea { %s }\n' % str(base_a)
+                        # mat_str += '  <Scalar> basea { %s }\n' % str(base_a)
                         mat_str += '  <Scalar> emitr { %s }\n' % str(emit_r)
                         mat_str += '  <Scalar> emitg { %s }\n' % str(emit_g)
                         mat_str += '  <Scalar> emitb { %s }\n' % str(emit_b)
                         mat_str += '  <Scalar> emita { %s }\n' % str(emit_a)
-                        mat_str += '  <Scalar> shininess { %s }\n' % str(specular)
+                        # mat_str += '  <Scalar> shininess { %s }\n' % str(specular)
                         mat_str += '  <Scalar> roughness { %s }\n' % str(roughness)
                         mat_str += '  <Scalar> metallic { %s }\n' % str(metallic)
-                        # mat_str += '  <Scalar> ior { %s }\n' % str(ior)
+                        mat_str += '  <Scalar> ior { %s }\n' % str(ior)
                         mat_str += '  <Scalar> local { %s }\n' % str(0)
 
         if matIsFancyPBRNode is False:
