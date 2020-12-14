@@ -1217,7 +1217,7 @@ def get_egg_materials_str(object_names=None):
                         if not principled_bsdf.inputs["Specular"].is_linked:
                             specular = principled_bsdf.inputs["Specular"].default_value
                         else:
-                            specular = 0
+                            specular = principled_bsdf.inputs["Specular"].default_value
 
                         if not principled_bsdf.inputs["Metallic"].is_linked:
                             metallic = principled_bsdf.inputs["Metallic"].default_value
@@ -1251,7 +1251,7 @@ def get_egg_materials_str(object_names=None):
                         base_r = basecol[0]
                         base_g = basecol[1]
                         base_b = basecol[2]
-                        base_a = basecol[3]
+                        # base_a = basecol[3]
 
                         emit_r = emission[0]
                         emit_g = normal_map_bump_factor
@@ -1262,11 +1262,14 @@ def get_egg_materials_str(object_names=None):
                         mat_str += '  <Scalar> baseg { %s }\n' % str(base_g)
                         mat_str += '  <Scalar> baseb { %s }\n' % str(base_b)
                         # mat_str += '  <Scalar> basea { %s }\n' % str(base_a)
+
                         mat_str += '  <Scalar> emitr { %s }\n' % str(emit_r)
                         mat_str += '  <Scalar> emitg { %s }\n' % str(emit_g)
                         mat_str += '  <Scalar> emitb { %s }\n' % str(emit_b)
                         mat_str += '  <Scalar> emita { %s }\n' % str(emit_a)
-                        # mat_str += '  <Scalar> shininess { %s }\n' % str(specular)
+
+                        mat_str += '  <Scalar> shininess { %s }\n' % str(specular)
+
                         mat_str += '  <Scalar> roughness { %s }\n' % str(roughness)
                         mat_str += '  <Scalar> metallic { %s }\n' % str(metallic)
                         mat_str += '  <Scalar> ior { %s }\n' % str(ior)
