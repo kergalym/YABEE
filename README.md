@@ -20,7 +20,7 @@ New minor features
 - Automatic selection
 - Apply object transform
 - Blender "BackFace Culling" feature (fixed)
-- RenderPipeline Transparent Shading Model
+- RenderPipeline Transparent Shading Model. 
   It activates only when Metallic and Transmission inputs have been set to 1.0 and Emission input to 0.0 
   (works with Principled BSDF only)
 
