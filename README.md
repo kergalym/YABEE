@@ -33,7 +33,7 @@ Missing features/TODO
 - Properties/tags
 - Texture baking via Cycles
 - Blender Lights
-- RenderPipeline Shading Models (Clearcoat, Skin, Foilage)
+- RenderPipeline Shading Models (Skin, Foilage)
 
 Principled Shader Support
 =====
