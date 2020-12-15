@@ -1242,11 +1242,9 @@ def get_egg_materials_str(object_names=None):
                                 if normal_map_node.inputs[0].name == "Strength":
                                     normal_map_bump_factor = normal_map_node.inputs["Strength"].default_value
 
-                        # TODO: Do we neeed this for Blender 2.8?
-                        """if not principled_bsdf.inputs['Clearcoat'].is_linked:
-                            clearcoat = principled_bsdf.inputs['Clearcoat'].default_value
-                        else:
-                            clearcoat = 0"""
+                        transmission = principled_bsdf.inputs['Transmission'].default_value
+
+                        clearcoat = principled_bsdf.inputs['Clearcoat'].default_value
 
                         base_r = basecol[0]
                         base_g = basecol[1]
@@ -1257,6 +1255,14 @@ def get_egg_materials_str(object_names=None):
                         emit_g = normal_map_bump_factor
                         emit_b = emission[2]
                         emit_a = emission[3]
+
+                        # Apply RenderPipeline SHADING_MODEL_TRANSPARENT 3;
+                        if transmission == 1.0 and metallic == 1.0:
+                            emit_r = 3
+
+                        # SHADING_MODEL_CLEARCOAT 2
+                        if clearcoat == 1.0:
+                            emit_r = 2
 
                         mat_str += '  <Scalar> baser { %s }\n' % str(base_r)
                         mat_str += '  <Scalar> baseg { %s }\n' % str(base_g)

@@ -1,7 +1,7 @@
 ![logo](http://i.imgur.com/lVMTcfS.png)
 
 
-YABEE 15.4
+YABEE 15.5
 =====
 Renewed Egg exporter for Blender 2.8 and Panda3D
 
@@ -20,6 +20,9 @@ New minor features
 - Automatic selection
 - Apply object transform
 - Blender "BackFace Culling" feature (fixed)
+- RenderPipeline Transparent Shading Model
+  It activates only when Metallic and Transmission inputs have been set to 1.0 and Emission input to 0.0 
+  (works with Principled BSDF only)
 
 **Some of these features could be activated by default**, uncheck them first if you don't use them and manually select your object(s).
 **Automatic selection** automatically selects all objects in the scene. 
@@ -30,6 +33,7 @@ Missing features/TODO
 - Properties/tags
 - Texture baking via Cycles
 - Blender Lights
+- RenderPipeline Shading Models (Clearcoat, Skin, Foilage)
 
 Principled Shader Support
 =====
