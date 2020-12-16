@@ -28,6 +28,8 @@ New minor features
 - RenderPipeline Skin Shading Model. 
   It activates only when Specular input have been set to lower than 0.5 and IOR input to lower than 1.0  
   (works with Principled BSDF only)
+  
+  <img src="https://i.imgur.com/yUanilZ.jpg" />
 
 - RenderPipeline Foilage Shading Model. 
   It activates only when Specular input have been set to lower than 0.5 and IOR input to higher than 1.0  
