@@ -1,5 +1,5 @@
 ------------- Release 15.5 ---------------
-* Added transparency (glass) support.
+* Added support for RenderPipeline Shading Models.
 
 ------------- Release 15.4 ---------------
 * Added support for Blender "BackFace Culling" feature.

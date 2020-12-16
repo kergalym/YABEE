@@ -20,10 +20,19 @@ New minor features
 - Automatic selection
 - Apply object transform
 - Blender "BackFace Culling" feature (fixed)
+
 - RenderPipeline Transparent Shading Model. 
   It activates only when Metallic and Transmission inputs have been set to 1.0 and Emission input to 0.0 
   (works with Principled BSDF only)
+  
+- RenderPipeline Skin Shading Model. 
+  It activates only when Specular input have been set to lower than 0.5 and IOR input to lower than 1.0  
+  (works with Principled BSDF only)
 
+- RenderPipeline Foilage Shading Model. 
+  It activates only when Specular input have been set to lower than 0.5 and IOR input to higher than 1.0  
+  (works with Principled BSDF only)
+  
 **Some of these features could be activated by default**, uncheck them first if you don't use them and manually select your object(s).
 **Automatic selection** automatically selects all objects in the scene. 
 **Apply object transform** will change **only copy** of the scene prepared for an export.
@@ -33,7 +42,6 @@ Missing features/TODO
 - Properties/tags
 - Texture baking via Cycles
 - Blender Lights
-- RenderPipeline Shading Models (Skin, Foilage)
 
 Principled Shader Support
 =====

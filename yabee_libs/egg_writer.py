@@ -1256,13 +1256,21 @@ def get_egg_materials_str(object_names=None):
                         emit_b = emission[2]
                         emit_a = emission[3]
 
-                        # Apply RenderPipeline SHADING_MODEL_TRANSPARENT 3;
+                        # Apply RenderPipeline SHADING_MODEL_TRANSPARENT 2;
+                        if clearcoat == 1.0:
+                            emit_r = 2
+
+                        # Apply RenderPipeline SHADING_MODEL_CLEARCOAT 3
                         if transmission == 1.0 and metallic == 1.0:
                             emit_r = 3
 
-                        # SHADING_MODEL_CLEARCOAT 2
-                        if clearcoat == 1.0:
-                            emit_r = 2
+                        # Apply RenderPipeline SHADING_MODEL_SKIN 4
+                        if specular < 0.5 and ior < 1.0:
+                            emit_r = 4
+
+                        # Apply RenderPipeline SHADING_MODEL_FOILAGE 5
+                        if specular < 0.5 and ior > 1.0:
+                            emit_r = 5
 
                         mat_str += '  <Scalar> baser { %s }\n' % str(base_r)
                         mat_str += '  <Scalar> baseg { %s }\n' % str(base_g)
